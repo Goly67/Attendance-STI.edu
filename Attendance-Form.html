@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<title>STI Attendance System</title>
+
+<style>
+
+    body {
+
+        font-family: Arial, sans-serif;
+
+        margin: center;
+
+        padding: 0;
+
+        text-align: center;
+
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+
+        height: 100vh;
+
+        background-image: url(STIBACK.jpeg);
+
+        background-repeat: no-repeat;
+
+        background-size: cover;
+
+    }
+
+    .container {
+
+        max-width: 400px;
+
+        padding: 20px;
+
+        background-color: #fff;
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    }
+
+    input {
+
+        width: 95%;
+
+        padding: 10px;
+
+        margin: 5px 0;
+
+        border: 1px solid #ccc;
+
+        border-radius: 5px;
+
+    }
+
+    button {
+
+        padding: 10px 159px;
+
+        background-color: #0078d4;
+
+        color: white;
+
+        border: none;
+
+        border-radius: 29px;
+
+        cursor: pointer;
+
+        margin-top: 5%;
+
+        font-size: 25px;
+
+    }
+
+    
+
+    .LOGOsti {
+
+        margin: center;
+
+        padding: 0px;
+
+        max-width: 140px;
+
+        border-radius: 50px;
+
+        align-items: center;
+
+        margin-bottom: 12px;
+
+    }
+
+    
+
+    .forgot-password {
+
+        position: fixed;
+
+        top: 50%;
+
+        left: 50%;
+
+        transform: translate(-50%, 700%);
+
+        padding: 10px 20px;
+
+        border-radius: 5px;
+
+        margin-top: 9px;
+
+        position: absolute;
+
+        text-align: center;
+
+        margin: center;
+
+        font-size: 17px;
+
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+    }
+
+    
+
+    .remember-me-label {
+
+        display: inline-block;
+
+        margin-top: 10px;
+
+    }
+
+
+
+    .remember-me-input{
+
+        width: 19px;
+
+        height: 19px;
+
+        padding: 0;
+
+        margin-left: -250px;
+
+        vertical-align: bottom;
+
+        position: relative;
+
+        top: 5px;
+
+        *overflow: hidden;
+
+        margin-top: 16px;
+
+    }
+
+</style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+    <img class="LOGOsti" src="STILOGO.png" alt="STIlogo" /><br/>
+
+    <label for="username">Username:</label>
+
+    <input type="text" id="username" placeholder="testuser">
+
+    <label for="password">Password:</label>
+
+    <input type="password" id="password" placeholder="testpassword"><br/>
+
+    <input type="checkbox" class="remember-me-input">
+
+    <label class="remember-me-label" for="remember"> Remember Me</label><br/>
+
+    <button onclick="login()">Login</button><br/>
+
+    <button class="forgot-password" onclick="window.location.href = 'https://www.your-forgot-password-page.com';">Forgot Password?</button>
+
+</div>
+
+
+
+<script>
+
+localStorage.setItem("testuser", "testpassword");
+
+
+
+    function login() {
+
+        var username = document.getElementById("username").value;
+
+        var password = document.getElementById("password").value;
+
+        var savedPassword = localStorage.getItem(username);
+
+
+
+        if (savedPassword === password) {
+
+            alert("Login successful!");
+
+            // Redirect to the attendance form page after successful login
+
+            window.location.href = "attendance-page.html";
+
+        } else {
+
+            alert("Incorrect username or password. Please try again.");
+
+            // Clear the input fields
+
+            document.getElementById("username").value = "";
+
+            document.getElementById("password").value = "";
+
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>
