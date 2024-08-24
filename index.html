@@ -58,16 +58,17 @@
     <button onclick="openCamera()">Scan QR Code</button>
 </div>
 
+<?php
+session_start();
+
+if (!isset($_SESSION['loggedIn'])) {
+    // User is not authenticated, redirect back to Website 1
+    header("Location: https://goly67.github.io/STILogin2024");
+    exit();
+}
+?>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if the user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    
-    if (!isLoggedIn) {
-        // Redirect back to Website 1 if not logged in
-        window.location.href = "https://goly67.github.io/STILogin2024/";
-    }
-});
     
   document.addEventListener("DOMContentLoaded", function() {
     const inputs = document.querySelectorAll('input');
