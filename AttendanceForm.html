@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>STI-Student-WIFI</title>
+    <style type="text/css" media="all">
+        body {
+        font-family: Arial, sans-serif;
+        margin: center;
+        padding: 0;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFpaTgrm_7qzNvVyfeXdvPAYjXI8kXGqYi4xLaxg9hNWXn57eBTG6K98k&s=10);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+    .container {
+        max-width: 400px;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    input {
+        width: 95%;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    button {
+        padding: 10px 159px;
+        background-color: #0078d4;
+        color: white;
+        border: none;
+        border-radius: 29px;
+        cursor: pointer;
+        margin-top: 5%;
+        font-size: 25px;
+    }
+    
+    .LOGOsti {
+        margin: center;
+        padding: 0px;
+        max-width: 140px;
+        border-radius: 50px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .forgot-password {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, 540%);
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-top: 9px;
+        position: absolute;
+        text-align: center;
+        margin: center;
+        font-size: 17px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .names {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        text-align: left;
+        z-index: 1;
+        background-color: #fff;
+        padding: 5px 0;
+        margin-left: -280px;
+        
+    }
+    </style>
+    <body>
+        <div class="container">
+           <img class="LOGOsti" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOtNfvKsNWQOIH-kXGvqazJXNrqRn20PV9DOMIEDfaeOKiPNOayZO581wJ&s=10" alt="STIlogo" />
+           <h1 class="">STI Wifi Login</h1>
+           <label class="names" for="username">Username:</label><br/>
+           <input type="text" id="username" placeholder="testuser"><br/><br/>
+           <label class="names" for="password">Password:</label><br/>
+           <input type="password" id="password" placeholder="testpassword"><br/>
+           <button onclick="login()">Login</button><br/>
+        </div>
+    </body>
+    
+    <script>
+localStorage.setItem("testuser", "testpassword");
+        let attempts = 0;
+        let lockoutTime = 180; // 3 minutes in seconds
+        let lockoutStart = null;
+
+        function login() {
+            var username = document.getElementById("username").value;
+            var password = document.getElementById("password").value;
+            var savedPassword = localStorage.getItem(username);
+
+            if (lockoutStart && Date.now() - lockoutStart < lockoutTime * 1000) {
+                alert(`Account locked for ${Math.round((lockoutTime * 1000 - (Date.now() - lockoutStart)) / 1000)} seconds.`);
+                return;
+            }
+
+            if (savedPassword === password) {
+                alert("Login successful!");
+                // Redirect to the attendance form page after successful login
+                window.location.href = "attendance-page.html";
+            } else {
+                attempts++;
+                alert("Incorrect username or password. Please try again.");
+                // Clear the input fields
+                document.getElementById("username").value = "";
+                document.getElementById("password").value = "";
+
+                if (attempts >= 3) {
+                    lockoutStart = Date.now();
+                    alert(`Account locked for ${lockoutTime} seconds.`);
+                }
+            }
+        }
+</script>
+<script>
+import subprocess
+import time
+
+def connect_to_wifi(ssid, password, time_limit):
+    start_time = time.time()
+    while time.time() - start_time < time_limit:
+        try:
+            subprocess.run(['netsh', 'wlan', 'connect', 'name=' + ssid, 'password=' + password])
+            print(f"Connected to WiFi: {ssid}")
+            break
+        except subprocess.CalledProcessError as e:
+            print(f"Error connecting to WiFi: {ssid}")
+            print(e)
+            time.sleep(5)  # Wait for 5 seconds before retrying
+    else:
+        print(f"Connection to WiFi: {ssid} timed out after {time_limit} seconds.")
+
+# Input the WiFi SSID, password, and time limit
+wifi_ssid = input("Enter the WiFi SSID: ")
+wifi_password = input("Enter the WiFi Password: ")
+login_time_limit = int(input("Enter the time limit in seconds: "))
+connect_to_wifi(wifi_ssid, wifi_password, login_time_limit)
+</script>
+</head>
