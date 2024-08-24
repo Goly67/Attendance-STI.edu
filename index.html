@@ -59,6 +59,16 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Check authentication status before allowing access
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (!isAuthenticated || isAuthenticated !== "true") {
+        window.location.href = "https://goly67.github.io/STILogin2024/";
+    }
+
+    // Your existing script for QR code scanning
+});
+    
   document.addEventListener("DOMContentLoaded", function() {
     const inputs = document.querySelectorAll('input');
     const button = document.getElementById('loginButton');
