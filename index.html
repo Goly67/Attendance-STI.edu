@@ -1,124 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="shortcut icon" type="x-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOtNfvKsNWQOIH-kXGvqazJXNrqRn20PV9DOMIEDfaeOKiPNOayZO581wJ&s=10">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=.6">
-<title>Attendance Form</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFpaTgrm_7qzNvVyfeXdvPAYjXI8kXGqYi4xLaxg9hNWXn57eBTG6K98k&s=10");
-        background-repeat: no-repeat;
-        background-size: cover;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        overflow-y: hidden;
-        overflow-x: hidden;
-        max-width: 100%;
-    }
-    .container {
-        max-width: 400px;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    input {
-        width: 95%;
-        padding: 10px;
-        margin: 5px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-    button {
-        padding: 10px 20px;
-        background-color: #0078d4;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STI Event Attendance</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.3.1/dist/jsQR.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        #videoContainer {
+            flex: 1;
+            position: relative;
+            max-width: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #qrCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #video {
+            width: 100%;
+            display: block;
+        }
+        form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        input, select, button {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+        #error {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            #videoContainer, form {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Attendance Form</h1>
-    <label for="name">Your Name:</label>
-    <input type="text" id="name">
-    <label for="strand">Your Strand:</label>
-    <input type="text" id="strand" placeholder="ICT-101">
-    <label for="date">The date:</label>
-    <input type="date" id="date"><br/>
-    <button onclick="openCamera()">Scan QR Code</button>
-</div>
+    <h1>STI Event Attendance</h1>
+    <div class="container">
+        <div id="videoContainer">
+            <video id="video" playsinline></video>
+            <canvas id="qrCanvas"></canvas>
+        </div>
+        <form id="attendanceForm">
+            <input type="text" id="name" placeholder="Full Name" required>
+            <input type="text" id="studentId" placeholder="Student ID" required>
+            <select id="strand" required>
+                <option value="">Select Strand</option>
+                <option value="STEM">STEM</option>
+                <option value="ICT">ICT</option>
+                <option value="GAS">GAS</option>
+            </select>
+            <button type="submit" disabled>Check In</button>
+        </form>
+    </div>
+    <div id="message"></div>
+    <div id="error"></div>
 
-<?php
-session_start();
+    <script>
+        const video = document.getElementById('video');
+        const qrCanvas = document.getElementById('qrCanvas');
+        const qrContext = qrCanvas.getContext('2d');
+        const attendanceForm = document.getElementById('attendanceForm');
+        const submitButton = attendanceForm.querySelector('button[type="submit"]');
+        const errorDiv = document.getElementById('error');
+        let qrScanned = false;
 
-if (!isset($_SESSION['loggedIn'])) {
-    // User is not authenticated, redirect back to Website 1
-    header("Location: https://goly67.github.io/STILogin2024");
-    exit();
-}
-?>
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true);
+                video.play();
+                requestAnimationFrame(tick);
+            });
 
-<script>
-    
-  document.addEventListener("DOMContentLoaded", function() {
-    const inputs = document.querySelectorAll('input');
-    const button = document.getElementById('loginButton');
-
-    // Handle key press event on inputs
-    inputs.forEach((input, index) => {
-        input.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent the default behavior
-                if (index < inputs.length - 1) {
-                    inputs[index + 1].focus(); // Move focus to the next input
-                } else {
-                    button.focus(); // Move focus to the Login button if at the last input
+        function tick() {
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                qrCanvas.height = video.videoHeight;
+                qrCanvas.width = video.videoWidth;
+                qrContext.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height);
+                var imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+                if (code) {
+                    console.log("QR Code detected", code.data);
+                    if (code.data === "check-in") {
+                        qrScanned = true;
+                        submitButton.disabled = false;
+                        document.getElementById('message').textContent = 'QR Code scanned successfully. You can now submit the form.';
+                        errorDiv.textContent = '';
+                    }
                 }
             }
+            if (!qrScanned) {
+                requestAnimationFrame(tick);
+            }
+        }
+
+        attendanceForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!qrScanned) {
+                errorDiv.textContent = 'Please scan the QR code before submitting the form.';
+                return;
+            }
+            const name = document.getElementById('name').value;
+            const studentId = document.getElementById('studentId').value;
+            const strand = document.getElementById('strand').value;
+            const timestamp = new Date().toISOString();
+
+            const attendanceData = {
+                name,
+                studentId,
+                strand,
+                checkInTime: timestamp,
+                checkOutTime: null
+            };
+
+            let attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+            attendance.push(attendanceData);
+            localStorage.setItem('attendance', JSON.stringify(attendance));
+
+            document.getElementById('message').textContent = 'Check-in successful!';
+            errorDiv.textContent = '';
+            
+            setTimeout(() => {
+                window.location.href = 'checkout.html';
+            }, 2000);
         });
-    });
-
-    // Handle key press event on the button
-    button.addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault(); // Prevent the default behavior
-            login(); // Call the login function when Enter is pressed on the button
-        }
-    });
-});
-    
-    async function openCamera() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            const video = document.createElement("video");
-            video.srcObject = stream;
-            video.setAttribute("autoplay", "");
-            document.body.appendChild(video);
-
-            const qrScanner = new ZXing.BrowserQRCodeReader();
-            qrScanner.decodeFromVideoDevice(undefined, video, (result) => {
-                if (result) {
-                    alert(`QR Code scanned successfully! Data: ${result.text}`);
-                    // Process the scanned QR code data
-                    // Save the information as needed
-                }
-            });
-        } catch (error) {
-            console.error("Error accessing camera:", error);
-            alert("Error accessing camera. Please check your camera permissions.");
-        }
-    }
-</script>
+    </script>
 </body>
 </html>
